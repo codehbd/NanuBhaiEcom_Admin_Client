@@ -481,6 +481,34 @@ export default function AddProduct() {
                 />
               </div>
 
+              {/* Price Preview Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-4 border border-blue-200 dark:border-gray-600">
+                <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                  Price Display Preview
+                </Label>
+                <div className="flex items-center gap-3">
+                  {formData.previousPrice && parseFloat(formData.previousPrice) > 0 ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-semibold text-red-600 dark:text-red-400">
+                          ৳{parseFloat(formData.price || 0).toFixed(2)}
+                        </span>
+                        <span className="text-xs text-gray-500 line-through dark:text-gray-400">
+                          ৳{parseFloat(formData.previousPrice || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded">
+                        {Math.round(((parseFloat(formData.previousPrice) - parseFloat(formData.price)) / parseFloat(formData.previousPrice)) * 100)}% OFF
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      ৳{parseFloat(formData.price || 0).toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               {/* Quantity */}
               <div>
                 <Label htmlFor="quantity">Quantity</Label>

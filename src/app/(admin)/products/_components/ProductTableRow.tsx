@@ -51,9 +51,25 @@ export default function ProductTableRow({ product }: { product: TProduct }) {
         </span>
       </td>
       <td className="px-5 py-4 sm:px-6 text-start">
-        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white">
-          {product?.price}
-        </span>
+        <div>
+          {product?.previousPrice && product?.previousPrice > product?.price ? (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-red-600 dark:text-red-400 text-theme-sm">
+                ৳{product?.price.toFixed(2)}
+              </span>
+              <span className="text-gray-500 line-through text-xs dark:text-gray-400">
+                ৳{product?.previousPrice.toFixed(2)}
+              </span>
+              <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">
+                {Math.round(((product?.previousPrice - product?.price) / product?.previousPrice) * 100)}% OFF
+              </span>
+            </div>
+          ) : (
+            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white">
+              ৳{product?.price.toFixed(2)}
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-5 py-4 sm:px-6 text-start">
         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white">

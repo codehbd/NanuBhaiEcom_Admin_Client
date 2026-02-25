@@ -16,7 +16,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
@@ -106,6 +106,17 @@ export default function EditProduct({
       images: [],
     },
     resolver: zodResolver(updateProductSchema) as any,
+  });
+
+  // Watch price and previousPrice for real-time preview
+  const watchPrice = useWatch({
+    control,
+    name: "price",
+  });
+
+  const watchPreviousPrice = useWatch({
+    control,
+    name: "previousPrice",
   });
 
   // Pre-fill product form values on product load (existing behavior)
@@ -475,7 +486,7 @@ export default function EditProduct({
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             {/* Price */}
             <div>
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Product Price</Label>
               <Controller
                 name="price"
                 control={control}
@@ -484,7 +495,9 @@ export default function EditProduct({
                     type="number"
                     id="price"
                     placeholder="Enter product price"
+                    step={0.01}
                     {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 )}
               />
@@ -506,7 +519,9 @@ export default function EditProduct({
                     type="number"
                     id="previousPrice"
                     placeholder="Enter product previous price"
+                    step={0.01}
                     {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 )}
               />
@@ -519,7 +534,7 @@ export default function EditProduct({
 
             {/* Extra Price */}
             <div>
-              <Label htmlFor="extraPrice">Extra Price </Label>
+              <Label htmlFor="extraPrice">Handling Charge  </Label>
               <Controller
                 name="extraPrice"
                 control={control}
@@ -528,7 +543,9 @@ export default function EditProduct({
                     type="number"
                     id="extraPrice"
                     placeholder="Enter product extra price"
+                    step={0.01}
                     {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 )}
               />
@@ -551,6 +568,7 @@ export default function EditProduct({
                     id="stock"
                     placeholder="Enter product stock"
                     {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 )}
               />
@@ -558,6 +576,34 @@ export default function EditProduct({
                 <p className="mt-1 text-xs text-red-500">
                   {errors?.stock?.message}
                 </p>
+              )}
+            </div>
+          </div>
+
+          {/* Price Preview Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6 border border-blue-200 dark:border-gray-600">
+            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 block">
+              Price Display Preview
+            </Label>
+            <div className="flex items-center gap-4">
+              {watchPreviousPrice && watchPreviousPrice > 0 ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold text-red-600 dark:text-red-400">
+                      ৳{parseFloat(String(watchPrice || 0)).toFixed(2)}
+                    </span>
+                    <span className="text-sm text-gray-500 line-through dark:text-gray-400">
+                      ৳{parseFloat(String(watchPreviousPrice || 0)).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-2 py-1 rounded">
+                    {Math.round(((Number(watchPreviousPrice) - Number(watchPrice)) / Number(watchPreviousPrice)) * 100)}% OFF
+                  </div>
+                </>
+              ) : (
+                <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  ৳{parseFloat(String(watchPrice || 0)).toFixed(2)}
+                </span>
               )}
             </div>
           </div>

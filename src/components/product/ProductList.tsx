@@ -416,12 +416,21 @@ export default function ProductList() {
                         </td>
                         <td className="px-5 py-4 sm:px-6 text-start">
                           <div>
-                            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white">
-                              ${product.price}
-                            </span>
-                            {product.previousPrice && product.previousPrice > product.price && (
-                              <span className="block text-gray-500 text-theme-xs line-through">
-                                ${product.previousPrice}
+                            {product.previousPrice && product.previousPrice > product.price ? (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="block font-semibold text-red-600 dark:text-red-400 text-theme-sm">
+                                  ৳{product.price.toFixed(2)}
+                                </span>
+                                <span className="text-gray-500 line-through text-xs dark:text-gray-400">
+                                  ৳{product.previousPrice.toFixed(2)}
+                                </span>
+                                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded">
+                                  {Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100)}% OFF
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="block font-semibold text-gray-800 dark:text-white text-theme-sm">
+                                ৳{product.price.toFixed(2)}
                               </span>
                             )}
                           </div>
