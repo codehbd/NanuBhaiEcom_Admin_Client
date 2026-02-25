@@ -491,10 +491,10 @@ export default function AddProduct() {
                     <>
                       <div className="flex items-center gap-2">
                         <span className="text-base font-semibold text-red-600 dark:text-red-400">
-                          ৳{parseFloat(formData.price || 0).toFixed(2)}
+                          ৳{parseFloat(String(formData.price) || '0').toFixed(2)}
                         </span>
                         <span className="text-xs text-gray-500 line-through dark:text-gray-400">
-                          ৳{parseFloat(formData.previousPrice || 0).toFixed(2)}
+                          ৳{parseFloat(String(formData.previousPrice) || '0').toFixed(2)}
                         </span>
                       </div>
                       <div className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded">
@@ -503,7 +503,7 @@ export default function AddProduct() {
                     </>
                   ) : (
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      ৳{parseFloat(formData.price || 0).toFixed(2)}
+                      ৳{parseFloat(String(formData.price) || '0').toFixed(2)}
                     </span>
                   )}
                 </div>
