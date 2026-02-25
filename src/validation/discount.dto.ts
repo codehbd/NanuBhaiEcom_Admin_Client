@@ -11,14 +11,26 @@ export const createDiscountSchema = zod
     ),
     method: zod.enum(["percentage", "flat", "tier", "bogo"], "Invalid method!"),
 
-    value: zod.coerce.number().optional(),
+    value: zod.union([
+      zod.string().transform((val) => (val === "" ? undefined : Number(val))),
+      zod.number(),
+    ]).optional(),
     code: zod.string().optional(),
-    minQty: zod.coerce.number().optional(),
+    minQty: zod.union([
+      zod.string().transform((val) => (val === "" ? undefined : Number(val))),
+      zod.number(),
+    ]).optional(),
     productIds: zod.array(zod.string()).optional(),
     categoryIds: zod.array(zod.string()).optional(),
     tierIds: zod.array(zod.string()).optional(),
-    minCartValue: zod.coerce.number().optional(),
-    usageLimit: zod.coerce.number().optional(),
+    minCartValue: zod.union([
+      zod.string().transform((val) => (val === "" ? undefined : Number(val))),
+      zod.number(),
+    ]).optional(),
+    usageLimit: zod.union([
+      zod.string().transform((val) => (val === "" ? undefined : Number(val))),
+      zod.number(),
+    ]).optional(),
     startDate: zod.union([
       zod
         .string()
@@ -109,6 +121,13 @@ export const createDiscountSchema = zod
           path: ["method"],
           code: "custom",
           message: "Coupon discounts must use method: 'percentage' or 'flat'!",
+        });
+      }
+      if (data.value === undefined || data.value === null || data.value <= 0) {
+        ctx.addIssue({
+          path: ["value"],
+          code: "custom",
+          message: "Value is required for coupon discounts!",
         });
       }
       if (!data.minCartValue || data.minCartValue <= 0) {

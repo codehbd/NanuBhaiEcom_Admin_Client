@@ -7,6 +7,15 @@ import { cookies } from "next/headers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Type for serialized discount data (dates as ISO strings)
+type SerializedDiscountData = Omit<
+  CreateDiscountSchemaType,
+  "startDate" | "endDate"
+> & {
+  startDate: string;
+  endDate: string;
+};
+
 async function getCookie() {
   const cookieObj = (await cookies()).get(
     process.env.NEXT_PUBLIC_TOKEN_NAME || "nanubhai"
@@ -41,7 +50,7 @@ export async function getAllDiscountsApi(page?: number, limit?: number) {
   return res.json();
 }
 export async function updateDiscountApi(
-  data: CreateDiscountSchemaType,
+  data: SerializedDiscountData,
   id: string
 ) {
   const token = await getCookie();
@@ -61,7 +70,7 @@ export async function updateDiscountApi(
 
   return res.json();
 }
-export async function createDiscountApi(data: CreateDiscountSchemaType) {
+export async function createDiscountApi(data: SerializedDiscountData) {
   const token = await getCookie();
   const res = await fetch(`${BASE_URL}/api/discount/create`, {
     method: "POST",

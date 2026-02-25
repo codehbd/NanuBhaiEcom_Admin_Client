@@ -12,7 +12,6 @@ import {
   activeInactiveDiscountSchema,
   ActiveInactiveDiscountSchemaType,
   createDiscountSchema,
-  CreateDiscountSchemaType,
   createDiscountTierSchema,
   CreateDiscountTierSchemaType,
 } from "@/validation/discount.dto";
@@ -20,7 +19,24 @@ import {
 import { revalidateTag } from "next/cache";
 import zod from "zod";
 
-export async function createDiscountAction(data: CreateDiscountSchemaType) {
+// Type for serialized discount data (dates as ISO strings) passed from client
+export type SerializedDiscountData = {
+  name: string;
+  type: "product" | "category" | "coupon" | "quantity";
+  method: "percentage" | "flat" | "tier" | "bogo";
+  value?: number;
+  code?: string;
+  minQty?: number;
+  productIds?: string[];
+  categoryIds?: string[];
+  tierIds?: string[];
+  minCartValue?: number;
+  usageLimit?: number;
+  startDate: string;
+  endDate: string;
+};
+
+export async function createDiscountAction(data: SerializedDiscountData) {
   try {
     const parsed = createDiscountSchema.safeParse(data);
     if (!parsed.success) {
@@ -29,7 +45,8 @@ export async function createDiscountAction(data: CreateDiscountSchemaType) {
         fieldErrors: zod.treeifyError(parsed.error).properties,
       } as const;
     }
-    const response = await createDiscountApi(parsed.data);
+    // Use original input data (with string dates) instead of parsed data (with Dayjs dates)
+    const response = await createDiscountApi(data);
     revalidateTag("discount");
     return {
       success: true,
@@ -44,7 +61,7 @@ export async function createDiscountAction(data: CreateDiscountSchemaType) {
   }
 }
 export async function updateDiscountAction(
-  data: CreateDiscountSchemaType,
+  data: SerializedDiscountData,
   id: string
 ) {
   try {
@@ -55,7 +72,8 @@ export async function updateDiscountAction(
         fieldErrors: zod.treeifyError(parsed.error).properties,
       } as const;
     }
-    const response = await updateDiscountApi(parsed.data, id);
+    // Use original input data (with string dates) instead of parsed data (with Dayjs dates)
+    const response = await updateDiscountApi(data, id);
     revalidateTag("discount");
     return {
       success: true,

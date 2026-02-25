@@ -6,6 +6,8 @@ import ProductsTableBody from "./_components/ProductsTableBody";
 import { getFlatAllCategoriesApi } from "@/services/categoryApi";
 import { TCategory } from "@/types/category";
 import CategoryFilter from "./_components/CategoryFilter";
+import Pagination from "@/components/Pagination";
+import { getAllProductsApi } from "@/services/productApi";
 
 export const metadata: Metadata = {
   title: "Product List | Nanuvaier Rosona Kothon - Your Online Shop",
@@ -72,6 +74,9 @@ const headers: string[] = [
   "Shipping",
   "Actions",
 ];
+
+const limit = 5;
+
 type SearchParams = Promise<{ page?: number ,category?:string}>;
 
 // Main component
@@ -79,6 +84,12 @@ async function fetchFlatAllCategories(): Promise<TCategory[]> {
   const data = await getFlatAllCategoriesApi();
   return data?.categories ?? [];
 }
+
+async function fetchProductsTotal(page?: number, category?: string): Promise<number> {
+  const data = await getAllProductsApi(page, limit, category);
+  return data?.total ?? 0;
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -86,6 +97,7 @@ export default async function ProductsPage({
 }) {
   const { page ,category} = await searchParams;
   const categories = await fetchFlatAllCategories();
+  const total = await fetchProductsTotal(page, category);
 
   return (
     <div>
@@ -122,6 +134,7 @@ export default async function ProductsPage({
                 </table>
               </div>
             </div>
+            <Pagination total={total} limit={limit} />
           </div>
         </ComponentCard>
       </div>

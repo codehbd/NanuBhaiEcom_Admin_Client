@@ -17,9 +17,29 @@ import {
 } from "@/validation/discount.dto";
 import { TDiscountTier } from "@/types/discount";
 import { TCategory } from "@/types/category";
-import { createDiscountAction } from "@/actions/discount";
+import { createDiscountAction, SerializedDiscountData } from "@/actions/discount";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+
+// Helper to serialize Dayjs dates to ISO strings
+function serializeFormData(data: CreateDiscountSchemaType) {
+  const start = data.startDate as any;
+  const end = data.endDate as any;
+  
+  return {
+    ...data,
+    startDate: dayjs.isDayjs(start)
+      ? start.toISOString()
+      : typeof start === "string"
+      ? start
+      : start?.toISOString?.() || start,
+    endDate: dayjs.isDayjs(end)
+      ? end.toISOString()
+      : typeof end === "string"
+      ? end
+      : end?.toISOString?.() || end,
+  };
+}
 
 export default function CreateDiscount({
   discountTiers,
@@ -41,40 +61,50 @@ export default function CreateDiscount({
       name: "",
       type: "product",
       method: "percentage",
-      value: 0,
+      value: "" as any,
       code: "",
-      minQty: 0,
+      minQty: "" as any,
       productIds: [],
       tierIds: [],
       categoryIds: [],
-      minCartValue: 0,
-      usageLimit: 0,
+      minCartValue: "" as any,
+      usageLimit: "" as any,
       startDate: dayjs(),
-      endDate: dayjs(),
+      endDate: dayjs().add(7, "day"),
     },
     resolver: zodResolver(createDiscountSchema) as any,
   });
   async function onSubmit(data: CreateDiscountSchemaType) {
-    console.log(data);
+    console.log("Form data:", data);
 
-    const result = await createDiscountAction(data);
+    try {
+      // Serialize dates before passing to Server Action
+      const serializedData = serializeFormData(data) as SerializedDiscountData;
+      console.log("Serialized data:", serializedData);
 
-    if (!result.success) {
-      if (result?.fieldErrors) {
-        Object.entries(result.fieldErrors).forEach(([field, messages]) => {
-          if (messages?.errors[0]) {
-            setError(field as keyof CreateDiscountSchemaType, {
-              type: "manual",
-              message: messages?.errors[0],
-            });
-          }
-        });
-      } else if (result.message) {
-        toast.error(result.message);
+      const result = await createDiscountAction(serializedData);
+      console.log("Action result:", result);
+
+      if (!result.success) {
+        if (result?.fieldErrors) {
+          Object.entries(result.fieldErrors).forEach(([field, messages]) => {
+            if (messages?.errors[0]) {
+              setError(field as keyof CreateDiscountSchemaType, {
+                type: "manual",
+                message: messages?.errors[0],
+              });
+            }
+          });
+        } else if (result.message) {
+          toast.error(result.message);
+        }
+      } else {
+        toast.success(result?.data?.message || "Discount created successfully!");
+        router.push("/discounts");
       }
-    } else {
-      toast.success(result?.data?.message || "Discount created successfully!");
-      router.push("/discounts");
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     }
   }
 

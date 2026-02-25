@@ -1,6 +1,5 @@
 import NoData from "@/components/NoData";
 import ErrorMessage from "@/components/ErrorMessage";
-import Pagination from "@/components/Pagination";
 import DiscountsTableRow from "./DiscountsTableRow";
 import { getAllDiscountsApi } from "@/services/discountsApi";
 import { TDiscount } from "@/types/discount";
@@ -12,6 +11,7 @@ async function fetchDiscounts(
   const data = await getAllDiscountsApi(page, limit);
   return { discounts: data?.discounts, total: data?.total };
 }
+
 export default async function DiscountsTableBody({
   page,
   headers,
@@ -20,11 +20,9 @@ export default async function DiscountsTableBody({
   headers?: string[];
 }) {
   let content = null;
-  let totalPage = 0;
   const limit = 5;
   try {
-    const { discounts, total } = await fetchDiscounts(page, limit);
-    totalPage = total;
+    const { discounts } = await fetchDiscounts(page, limit);
 
     content = discounts?.length ? (
       discounts.map((discount: TDiscount) => (
@@ -53,11 +51,8 @@ export default async function DiscountsTableBody({
     );
   }
   return (
-    <>
-      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-        {content}
-      </tbody>
-      <Pagination total={totalPage} limit={limit} />
-    </>
+    <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+      {content}
+    </tbody>
   );
 }

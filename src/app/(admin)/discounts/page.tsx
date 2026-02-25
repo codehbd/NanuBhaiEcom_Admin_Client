@@ -3,20 +3,26 @@ import { Suspense } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
 import DiscountsTableBody from "./_components/DiscountsTableBody";
+import Pagination from "@/components/Pagination";
+import { getAllDiscountsApi } from "@/services/discountsApi";
 
 export const metadata: Metadata = {
   title: "Discount List | Nanuvaier Rosona Kothon - Your Online Shop",
   description: "An online store for all your needs",
 };
+
 const headers: string[] = [
   "Name",
   "Type",
   "Method",
+  "Value",
   "Status",
   "StartDate",
   "endDate",
   "Actions",
 ];
+
+const limit = 5;
 function LoadingSkeleton() {
   return (
     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -35,6 +41,11 @@ function LoadingSkeleton() {
           {/* Method */}
           <td className="px-5 py-4 sm:px-6">
             <div className="h-4 w-20 bg-gray-300 dark:bg-gray-600 rounded-md"></div>
+          </td>
+
+          {/* Value */}
+          <td className="px-5 py-4 sm:px-6">
+            <div className="h-4 w-16 bg-gray-300 dark:bg-gray-600 rounded-md"></div>
           </td>
 
           {/* Status */}
@@ -67,12 +78,18 @@ function LoadingSkeleton() {
 
 type SearchParams = Promise<{ page?: number }>;
 
+async function fetchDiscountsTotal(page?: number): Promise<number> {
+  const data = await getAllDiscountsApi(page, limit);
+  return data?.total ?? 0;
+}
+
 export default async function DiscountsPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
   const { page } = await searchParams;
+  const total = await fetchDiscountsTotal(page);
 
   return (
     <>
@@ -100,6 +117,7 @@ export default async function DiscountsPage({
               </table>
             </div>
           </div>
+          <Pagination total={total} limit={limit} />
         </div>
       </ComponentCard>
     </>

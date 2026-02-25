@@ -3,7 +3,6 @@ import { TProduct } from "@/types/product";
 import { getAllProductsApi } from "@/services/productApi";
 import ErrorMessage from "@/components/ErrorMessage";
 import ProductTableRow from "./ProductTableRow";
-import Pagination from "@/components/Pagination";
 
 async function fetchProducts(
   page?: number,
@@ -13,6 +12,7 @@ async function fetchProducts(
   const data = await getAllProductsApi(page, limit,category);
   return { products: data?.products, total: data?.total };
 }
+
 export default async function ProductsTableBody({
   page,
   category,
@@ -23,11 +23,9 @@ export default async function ProductsTableBody({
   headerCount: number;
 }) {
   let content = null;
-  let totalPage = 0;
   const limit = 5;
   try {
-    const { products, total } = await fetchProducts(page, limit,category);
-    totalPage = total;
+    const { products } = await fetchProducts(page, limit,category);
 
     content = products?.length ? (
       products.map((product: TProduct) => (
@@ -56,11 +54,8 @@ export default async function ProductsTableBody({
     );
   }
   return (
-    <>
-      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-        {content}
-      </tbody>
-      <Pagination total={totalPage} limit={limit} />
-    </>
+    <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+      {content}
+    </tbody>
   );
 }

@@ -5,7 +5,10 @@ export const createCategorySchema = zod.object({
     .string("Category name is required!")
     .trim()
     .nonempty("Category name is required!"),
-  parentId: zod.string("Parent id must be a string").trim().optional(),
+  parentId: zod
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .optional(),
 
   image: zod
     .instanceof(File, { message: "Category image is required!" })
@@ -24,7 +27,10 @@ export const createCategorySchema = zod.object({
 
 export const updateCategorySchema = zod.object({
   name: zod.string("Category name is required!").trim().optional(),
-  parentId: zod.string("Parent id must be a string").trim().optional(),
+  parentId: zod
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .optional(),
 
   image: zod
     .instanceof(File, { message: "Category image is required!" })

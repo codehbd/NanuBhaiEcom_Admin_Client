@@ -90,6 +90,7 @@ const Datepicker: React.FC<DateTimeInputProps> = ({
           error={error}
           success={success}
           hint={hint}
+          readOnly
         />
       </div>
 

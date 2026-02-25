@@ -17,10 +17,30 @@ import {
 } from "@/validation/discount.dto";
 import { TDiscount, TDiscountTier } from "@/types/discount";
 import { TCategory } from "@/types/category";
-import { updateDiscountAction } from "@/actions/discount";
+import { SerializedDiscountData, updateDiscountAction } from "@/actions/discount";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+// Helper to serialize Dayjs dates to ISO strings
+function serializeFormData(data: CreateDiscountSchemaType) {
+  const start = data.startDate as any;
+  const end = data.endDate as any;
+  
+  return {
+    ...data,
+    startDate: dayjs.isDayjs(start)
+      ? start.toISOString()
+      : typeof start === "string"
+      ? start
+      : start?.toISOString?.() || start,
+    endDate: dayjs.isDayjs(end)
+      ? end.toISOString()
+      : typeof end === "string"
+      ? end
+      : end?.toISOString?.() || end,
+  };
+}
 
 export default function EditDiscount({
   discount,
@@ -53,22 +73,24 @@ export default function EditDiscount({
       name: "",
       type: "product",
       method: "percentage",
-      value: 0,
+      value: "" as any,
       code: "",
-      minQty: 0,
+      minQty: "" as any,
       productIds: [],
       tierIds: [],
       categoryIds: [],
-      minCartValue: 0,
-      usageLimit: 0,
+      minCartValue: "" as any,
+      usageLimit: "" as any,
       startDate: dayjs(),
-      endDate: dayjs(),
+      endDate: dayjs().add(7, "day"),
     },
     resolver: zodResolver(createDiscountSchema) as any,
   });
 
   async function onSubmit(data: CreateDiscountSchemaType) {
-    const result = await updateDiscountAction(data, id);
+    // Serialize dates before passing to Server Action
+    const serializedData = serializeFormData(data) as SerializedDiscountData;
+    const result = await updateDiscountAction(serializedData, id);
 
     if (!result.success) {
       if (result?.fieldErrors) {

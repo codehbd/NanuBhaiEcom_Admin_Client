@@ -62,6 +62,11 @@ export default function DiscountsTableRow({
         </span>
       </td>
       <td className="px-5 py-4 sm:px-6 text-start">
+        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white">
+          {discount?.value || "-"}
+        </span>
+      </td>
+      <td className="px-5 py-4 sm:px-6 text-start">
         <Switch
           label={discount?.status}
           onChange={(checked) => handleActiveInactive(checked, discount?._id)}
