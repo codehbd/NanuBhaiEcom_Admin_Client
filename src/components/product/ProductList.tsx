@@ -81,6 +81,46 @@ export default function ProductList() {
   const { isOpen, openModal, closeModal } = useModal();
   const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [jumpToPage, setJumpToPage] = useState("");
+
+  // Derived pagination values
+  const totalItems = products.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+  const paginatedProducts = products.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    const p = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(p);
+  };
+  const handleRowsPerPageChange = (value: number) => {
+    setRowsPerPage(value);
+    setCurrentPage(1);
+  };
+  const handleJumpToPage = () => {
+    const page = parseInt(jumpToPage);
+    if (!isNaN(page)) goToPage(page);
+    setJumpToPage("");
+  };
+
+  // Generate visible page numbers with ellipsis
+  const getPageNumbers = (): (number | string)[] => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pages: (number | string)[] = [1];
+    if (currentPage > 3) pages.push("...");
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (currentPage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  };
+
   // Fetch products on component mount
   useEffect(() => {
     fetchProducts();
@@ -377,14 +417,14 @@ export default function ProductList() {
                         Loading products...
                       </td>
                     </tr>
-                  ) : products.length === 0 ? (
+                  ) : paginatedProducts.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-5 py-4 sm:px-6 text-center text-gray-500 dark:text-gray-400">
                         No products found
                       </td>
                     </tr>
                   ) : (
-                    products.map((product) => (
+                    paginatedProducts.map((product) => (
                       <tr key={`product-${product.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 h-[72px]">
                         <td className="px-5 py-4 sm:px-6 text-start">
                           {product.imageUrl && (
@@ -407,8 +447,8 @@ export default function ProductList() {
                               {product.name}
                             </span>
                             <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                              {product.description.length > 50 
-                                ? `${product.description.substring(0, 50)}...` 
+                              {product.description.length > 50
+                                ? `${product.description.substring(0, 50)}...`
                                 : product.description
                               }
                             </span>
@@ -441,11 +481,10 @@ export default function ProductList() {
                           </span>
                         </td>
                         <td className="px-5 py-4 sm:px-6 text-start">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                            product.stockStatus === 'inStock' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                          }`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'inStock'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                            }`}>
                             {product.stockStatus}
                           </span>
                         </td>
@@ -477,6 +516,126 @@ export default function ProductList() {
             </div>
           </div>
         </div>
+
+        {/* ── Advanced Pagination Bar ── */}
+        {totalItems > 0 && (
+          <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 px-5 py-3 sm:px-6">
+            {/* Top row: rows-per-page + summary + jump-to */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
+              {/* Left: Rows per page */}
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span>Rows per page:</span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+                  className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-1 pl-2 pr-7 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none cursor-pointer"
+                >
+                  {[5, 10, 20, 50, 100].map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Center: Summary */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing{" "}
+                <span className="font-semibold text-gray-800 dark:text-white">{startIndex + 1}</span>
+                {" "}–{" "}
+                <span className="font-semibold text-gray-800 dark:text-white">{endIndex}</span>
+                {" "}of{" "}
+                <span className="font-semibold text-gray-800 dark:text-white">{totalItems}</span>
+                {" "}products
+              </p>
+
+              {/* Right: Jump to page */}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600 dark:text-gray-300">Go to:</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={jumpToPage}
+                  onChange={(e) => setJumpToPage(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleJumpToPage()}
+                  placeholder={String(currentPage)}
+                  className="w-14 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-1 px-2 text-sm text-center focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+            </div>
+
+            {/* Bottom row: navigation buttons */}
+            <div className="flex items-center justify-center gap-1 flex-wrap">
+              {/* First page */}
+              <button
+                onClick={() => goToPage(1)}
+                disabled={currentPage === 1}
+                title="First page"
+                className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Previous */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                title="Previous page"
+                className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Page numbers */}
+              {getPageNumbers().map((page, idx) =>
+                typeof page === "string" ? (
+                  <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 dark:text-gray-500 text-sm select-none">
+                    ···
+                  </span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`min-w-[32px] h-8 px-2 rounded-md text-sm font-medium transition-colors ${currentPage === page
+                        ? "bg-brand-500 text-white shadow-sm"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
+              {/* Next */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                title="Next page"
+                className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Last page */}
+              <button
+                onClick={() => goToPage(totalPages)}
+                disabled={currentPage === totalPages}
+                title="Last page"
+                className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
       </ComponentCard>
 
       {/* Edit Modal */}
@@ -522,7 +681,7 @@ export default function ProductList() {
               <input
                 type="text"
                 value={editForm.name}
-                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               />
             </div>
@@ -532,7 +691,7 @@ export default function ProductList() {
               <input
                 type="number"
                 value={editForm.price}
-                onChange={(e) => setEditForm({...editForm, price: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                 min="0"
                 step="0.01"
@@ -544,7 +703,7 @@ export default function ProductList() {
               <input
                 type="number"
                 value={editForm.previousPrice}
-                onChange={(e) => setEditForm({...editForm, previousPrice: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, previousPrice: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                 min="0"
                 step="0.01"
@@ -556,7 +715,7 @@ export default function ProductList() {
               <input
                 type="number"
                 value={editForm.quantity}
-                onChange={(e) => setEditForm({...editForm, quantity: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                 min="0"
               />
@@ -566,7 +725,7 @@ export default function ProductList() {
               <Label>Stock Status</Label>
               <select
                 value={editForm.stockStatus}
-                onChange={(e) => setEditForm({...editForm, stockStatus: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, stockStatus: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               >
                 <option value="inStock">In Stock</option>
@@ -578,7 +737,7 @@ export default function ProductList() {
               <Label>Free Delivery</Label>
               <select
                 value={editForm.freeDelivery}
-                onChange={(e) => setEditForm({...editForm, freeDelivery: e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, freeDelivery: e.target.value })}
                 className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               >
                 <option value="yes">Yes</option>
@@ -591,7 +750,7 @@ export default function ProductList() {
             <Label>Description</Label>
             <textarea
               value={editForm.description}
-              onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
               rows={4}
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
             />

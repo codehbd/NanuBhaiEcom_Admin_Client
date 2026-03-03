@@ -7,9 +7,10 @@ import ProductTableRow from "./ProductTableRow";
 async function fetchProducts(
   page?: number,
   limit?: number,
-  category ?: string,
+  category?: string,
+  search?: string,
 ): Promise<{ products: TProduct[]; total: number }> {
-  const data = await getAllProductsApi(page, limit,category);
+  const data = await getAllProductsApi(page, limit, category, search);
   return { products: data?.products, total: data?.total };
 }
 
@@ -17,15 +18,18 @@ export default async function ProductsTableBody({
   page,
   category,
   headerCount,
+  limit = 5,
+  search,
 }: {
   page?: number;
-  category?:string;
+  category?: string;
   headerCount: number;
+  limit?: number;
+  search?: string;
 }) {
   let content = null;
-  const limit = 5;
   try {
-    const { products } = await fetchProducts(page, limit,category);
+    const { products } = await fetchProducts(page, limit, category, search);
 
     content = products?.length ? (
       products.map((product: TProduct) => (

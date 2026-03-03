@@ -9,10 +9,10 @@ async function getCookie() {
   return cookieObj?.value;
 }
 
-export async function getAllProductsApi(page?: number, limit?: number,category ?:string) {
+export async function getAllProductsApi(page?: number, limit?: number, category?: string, name?: string) {
   const token = await getCookie();
   const res = await fetch(
-    `${BASE_URL}/api/product/all?page=${page || 1}&limit=${limit || 5}&category=${category || ""}`,
+    `${BASE_URL}/api/product/all?page=${page || 1}&limit=${limit || 5}&category=${category || ""}&name=${name || ""}`,
     {
       cache: "no-store",
       next: { tags: ["Product"] },

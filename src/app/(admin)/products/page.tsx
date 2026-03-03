@@ -5,9 +5,11 @@ import { Suspense } from "react";
 import ProductsTableBody from "./_components/ProductsTableBody";
 import { getFlatAllCategoriesApi } from "@/services/categoryApi";
 import { TCategory } from "@/types/category";
-import CategoryFilter from "./_components/CategoryFilter";
+import ProductFilters from "./_components/ProductFilters";
+import ProductSearch from "./_components/ProductSearch";
 import Pagination from "@/components/Pagination";
 import { getAllProductsApi } from "@/services/productApi";
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Product List | Nanuvaier Rosona Kothon - Your Online Shop",
@@ -75,9 +77,9 @@ const headers: string[] = [
   "Actions",
 ];
 
-const limit = 5;
+const DEFAULT_LIMIT = 5;
 
-type SearchParams = Promise<{ page?: number ,category?:string}>;
+type SearchParams = Promise<{ page?: number; category?: string; limit?: number; search?: string }>;
 
 // Main component
 async function fetchFlatAllCategories(): Promise<TCategory[]> {
@@ -85,8 +87,8 @@ async function fetchFlatAllCategories(): Promise<TCategory[]> {
   return data?.categories ?? [];
 }
 
-async function fetchProductsTotal(page?: number, category?: string): Promise<number> {
-  const data = await getAllProductsApi(page, limit, category);
+async function fetchProductsTotal(page?: number, limit?: number, category?: string, search?: string): Promise<number> {
+  const data = await getAllProductsApi(page, limit || DEFAULT_LIMIT, category, search);
   return data?.total ?? 0;
 }
 
@@ -95,19 +97,23 @@ export default async function ProductsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { page ,category} = await searchParams;
+  const { page, category, limit: limitParam, search } = await searchParams;
+  const cookieStore = await cookies();
+  const savedLimit = cookieStore.get("rows_per_page")?.value;
+  const currentLimit = Number(limitParam) || Number(savedLimit) || DEFAULT_LIMIT;
   const categories = await fetchFlatAllCategories();
-  const total = await fetchProductsTotal(page, category);
+  const total = await fetchProductsTotal(page, currentLimit, category, search);
 
   return (
     <div>
       <PageBreadcrumb pageTitle="Product List" />
       <div className="space-y-6">
-        <ComponentCard title="Products">
+        <ComponentCard title="Products" headerRight={<ProductSearch />}>
           <div className="w-full overflow-x-auto">
-            <div className="my-2 flex flex-col gap-y-1 w-fit">
-              <h1 className="text-sm text-white">Category</h1>
-              <CategoryFilter categories={categories}/>
+            {/* Top bar: Filters left, Pagination right */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-4">
+              <ProductFilters categories={categories} />
+              <Pagination total={total} limit={currentLimit} className="py-0" />
             </div>
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -129,12 +135,14 @@ export default async function ProductsPage({
                       page={page}
                       category={category}
                       headerCount={headers.length}
+                      limit={currentLimit}
+                      search={search}
                     />
                   </Suspense>
                 </table>
               </div>
             </div>
-            <Pagination total={total} limit={limit} />
+            <Pagination total={total} limit={currentLimit} />
           </div>
         </ComponentCard>
       </div>
