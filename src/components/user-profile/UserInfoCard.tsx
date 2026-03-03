@@ -7,13 +7,59 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useSelector } from "react-redux";
 
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { updateProfileAction } from "@/actions/user";
+import { userLoggedIn } from "@/redux/features/auth/authSlice";
+
 export default function UserInfoCard() {
-  const {user} = useSelector((state : any) => state.auth);
+  const { user } = useSelector((state: any) => state.auth);
+  const dispatch = useDispatch();
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    facebook: "",
+    instagram: "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: user.bio || "",
+        facebook: user.socialLinks?.facebook || "",
+        instagram: user.socialLinks?.instagram || "",
+      });
+    }
+  }, [user]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    try {
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("phone", formData.phone);
+      data.append("bio", formData.bio);
+      data.append("socialLinks[facebook]", formData.facebook);
+      data.append("socialLinks[instagram]", formData.instagram);
+
+      const result = await updateProfileAction(data);
+      if (result.success) {
+        dispatch(userLoggedIn({ user: result.data.user }));
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+    }
   };
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -33,7 +79,7 @@ export default function UserInfoCard() {
               </p>
             </div>
 
-          
+
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
@@ -53,14 +99,16 @@ export default function UserInfoCard() {
               </p>
             </div>
 
-            {/* <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Full-Stack Developer
-              </p>
-            </div> */}
+            {user?.bio && (
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Bio
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {user.bio}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -109,7 +157,9 @@ export default function UserInfoCard() {
                     <Label>Facebook</Label>
                     <Input
                       type="text"
-                      defaultValue="https://www.facebook.com"
+                      name="facebook"
+                      value={formData.facebook}
+                      onChange={handleChange}
                     />
                   </div>
 
@@ -117,7 +167,9 @@ export default function UserInfoCard() {
                     <Label>Instagram</Label>
                     <Input
                       type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
+                      name="instagram"
+                      value={formData.instagram}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -129,37 +181,51 @@ export default function UserInfoCard() {
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" defaultValue="Atiqur" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Rahman" />
+                    <Label>Full Name</Label>
+                    <Input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" defaultValue="topu1234@gmail.com" />
+                    <Input
+                      type="text"
+                      value={formData.email}
+                      disabled
+                    />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" defaultValue="01729299544" />
+                    <Input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className="col-span-2">
                     <Label>Bio</Label>
-                    <Input type="text" defaultValue="Full-Stack Developer" />
+                    <Input
+                      type="text"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+              <Button type="button" size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button type="button" size="sm" onClick={handleSave}>
                 Save Changes
               </Button>
             </div>

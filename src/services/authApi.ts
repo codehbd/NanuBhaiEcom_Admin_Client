@@ -48,6 +48,23 @@ export async function userProfileApi() {
   }
 }
 
+export async function updateProfileApi(formData: FormData) {
+  const token = await getCookie();
+  const res = await fetch(`${BASE_URL}/api/user/update-profile`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`, // Let browser set multipart/form-data boundary
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const result = await res.json().catch(() => ({}));
+    throw new Error(result.message || "Profile update failed!");
+  }
+  return res.json();
+}
+
 export async function logoutApi() {
   const token = await getCookie();
   const res = await fetch(`${BASE_URL}/api/user/logout`, {

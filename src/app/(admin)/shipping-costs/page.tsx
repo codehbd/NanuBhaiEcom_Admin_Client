@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ShippingCostTableBody from "./_components/ShippingCostTableBody";
 import CreateShipping from "./_components/CreateShipping";
+import { getDivisionsApi } from "@/services/shippingCostApi";
 
 export const metadata: Metadata = {
   title: "Shipping Cost List | Nanuvaier Rosona Kothon - Your Online Shop",
@@ -36,11 +37,21 @@ function LoadingSkeleton() {
   );
 }
 
+async function fetchDivisions() {
+  try {
+    const data = await getDivisionsApi();
+    return data?.divisions ?? [];
+  } catch (error) {
+    return [];
+  }
+}
+
 export default async function ShippingCostPage() {
+  const divisions = await fetchDivisions();
   return (
     <>
       <PageBreadcrumb pageTitle="Shipping Cost List" />
-      <CreateShipping />
+      <CreateShipping divisions={divisions} />
       <div className="mt-4 w-full overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
