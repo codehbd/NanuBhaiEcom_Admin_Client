@@ -109,6 +109,7 @@ export default function CreateProduct({
       description: "",
       price: 1,
       previousPrice: 0,
+      buyingPrice: 0,
       extraPrice: 0,
       stock: 1,
       featured: "false",
@@ -360,10 +361,11 @@ console.log(watch())
           </div>
 
           {/* ---------------- Price / Stock ---------------- */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             {[
               { name: "price", label: "Product Price *" },
               { name: "previousPrice", label: "Previous Price" },
+              { name: "buyingPrice", label: "Buying Price" },
               { name: "extraPrice", label: "Handling Charge" },
               { name: "stock", label: "Stock" },
             ].map(({ name, label }) => (

@@ -19,6 +19,7 @@ export interface TProduct {
   brandId: string;
   description: string;
   price: number;
+  buyingPrice: number | null;
   previousPrice: number | null;
   extraPrice: number | null;
   stock: number;

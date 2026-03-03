@@ -100,6 +100,7 @@ export default function EditProduct({
       description: "",
       price: 1,
       previousPrice: 1,
+      buyingPrice: 1,
       extraPrice: 1,
       stock: 1,
       featured: "false",
@@ -131,6 +132,7 @@ export default function EditProduct({
         description: product?.description,
         price: product?.price,
         previousPrice: product?.previousPrice ?? undefined,
+        buyingPrice: product?.buyingPrice ?? undefined,
         extraPrice: product?.extraPrice ?? undefined,
         stock: product?.stock,
         featured: product?.featured ? "true" : "false",
@@ -235,7 +237,12 @@ export default function EditProduct({
     const formDataToSend = new FormData();
     for (const key in data) {
       if (key === "images") continue;
-      formDataToSend.append(key, (data as any)[key]);
+      // Skip dynamic category-level-* fields
+      if (key.startsWith("category-level-")) continue;
+      const value = (data as any)[key];
+      // Skip undefined/null values
+      if (value === undefined || value === null) continue;
+      formDataToSend.append(key, value);
     }
     files.forEach((file) => formDataToSend.append("images", file));
 
@@ -485,7 +492,7 @@ export default function EditProduct({
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             {/* Price */}
             <div>
               <Label htmlFor="price">Product Price</Label>
@@ -530,6 +537,30 @@ export default function EditProduct({
               {errors?.previousPrice && (
                 <p className="mt-1 text-xs text-red-500">
                   {errors?.previousPrice?.message}
+                </p>
+              )}
+            </div>
+
+            {/* Buying Price */}
+            <div>
+              <Label htmlFor="buyingPrice">Buying Price</Label>
+              <Controller
+                name="buyingPrice"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    id="buyingPrice"
+                    placeholder="Enter buying price"
+                    step={0.01}
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                )}
+              />
+              {errors?.buyingPrice && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors?.buyingPrice?.message}
                 </p>
               )}
             </div>
