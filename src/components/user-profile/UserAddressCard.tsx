@@ -6,12 +6,55 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateProfileAction } from "@/actions/user";
+import { userLoggedIn } from "@/redux/features/auth/authSlice";
+
 export default function UserAddressCard() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { user } = useSelector((state: any) => state.auth);
+  const dispatch = useDispatch();
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+
+  const [formData, setFormData] = useState({
+    country: "",
+    cityState: "",
+    postalCode: "",
+    taxId: "",
+  });
+
+  useEffect(() => {
+    if (user?.address) {
+      setFormData({
+        country: user.address.country || "",
+        cityState: user.address.cityState || "",
+        postalCode: user.address.postalCode || "",
+        taxId: user.address.taxId || "",
+      });
+    }
+  }, [user]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    try {
+      const data = new FormData();
+      data.append("address[country]", formData.country);
+      data.append("address[cityState]", formData.cityState);
+      data.append("address[postalCode]", formData.postalCode);
+      data.append("address[taxId]", formData.taxId);
+
+      const result = await updateProfileAction(data);
+      if (result.success) {
+        dispatch(userLoggedIn({ user: result.data.user }));
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+    }
   };
   return (
     <>
@@ -28,7 +71,7 @@ export default function UserAddressCard() {
                   Country
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Bangladesh
+                  {user?.address?.country || "Not set"}
                 </p>
               </div>
 
@@ -37,7 +80,7 @@ export default function UserAddressCard() {
                   City/State
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Bashundhara R/A, Dhaka.
+                  {user?.address?.cityState || "Not set"}
                 </p>
               </div>
 
@@ -46,7 +89,7 @@ export default function UserAddressCard() {
                   Postal Code
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  1200
+                  {user?.address?.postalCode || "Not set"}
                 </p>
               </div>
 
@@ -55,7 +98,7 @@ export default function UserAddressCard() {
                   TAX ID
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  AS4568384
+                  {user?.address?.taxId || "Not set"}
                 </p>
               </div>
             </div>
@@ -99,30 +142,50 @@ export default function UserAddressCard() {
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Country</Label>
-                  <Input type="text" defaultValue="Bangladesh" />
+                  <Input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
                   <Label>City/State</Label>
-                  <Input type="text" defaultValue="Bashundhara R/A, Dhaka." />
+                  <Input
+                    type="text"
+                    name="cityState"
+                    value={formData.cityState}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
                   <Label>Postal Code</Label>
-                  <Input type="text" defaultValue="1200" />
+                  <Input
+                    type="text"
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
                   <Label>TAX ID</Label>
-                  <Input type="text" defaultValue="AS4568384" />
+                  <Input
+                    type="text"
+                    name="taxId"
+                    value={formData.taxId}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+              <Button type="button" size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button type="button" size="sm" onClick={handleSave}>
                 Save Changes
               </Button>
             </div>

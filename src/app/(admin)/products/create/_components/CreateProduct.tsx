@@ -30,25 +30,14 @@ interface TDivions {
   value: string;
 }
 
-const divisions: TDivions[] = [
-  { label: "All over BD", value: "All over BD" },
-  { label: "Insite City", value: "Insite City" },
-  { label: "Barishal", value: "Barishal" },
-  { label: "Chattogram", value: "Chattogram" },
-  { label: "Dhaka", value: "Dhaka" },
-  { label: "Khulna", value: "Khulna" },
-  { label: "Mymensingh", value: "Mymensingh" },
-  { label: "Rajshahi", value: "Rajshahi" },
-  { label: "Rangpur", value: "Rangpur" },
-  { label: "Sylhet", value: "Sylhet" },
-];
-
 export default function CreateProduct({
   categories,
   brands,
+  divisions,
 }: {
   categories: TCategory[];
   brands: TBrand[];
+  divisions: TDivions[];
 }) {
   const router = useRouter();
 
@@ -99,7 +88,7 @@ export default function CreateProduct({
     handleSubmit,
     control,
     setError,
-    setValue,watch,
+    setValue, watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateProductSchemaType>({
     defaultValues: {
@@ -182,7 +171,7 @@ export default function CreateProduct({
     toast.success(result.data?.message || "Product created successfully!");
     router.push("/products");
   };
-console.log(watch())
+  console.log(watch())
   return (
     <ComponentCard title="Create New Product">
       <Form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -194,11 +183,10 @@ console.log(watch())
             <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
               <div
                 {...getRootProps()}
-                className={`dropzone rounded-xl p-7 lg:p-10 ${
-                  isDragActive
+                className={`dropzone rounded-xl p-7 lg:p-10 ${isDragActive
                     ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
                     : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
-                }`}
+                  }`}
               >
                 <input {...getInputProps()} />
 
@@ -472,9 +460,8 @@ console.log(watch())
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-600 ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-600 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isSubmitting ? "Creating..." : "Create Product"}
             </button>

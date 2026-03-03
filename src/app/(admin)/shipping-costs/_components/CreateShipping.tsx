@@ -15,7 +15,12 @@ import {
 } from "@/validation/shipping.dto";
 import { createShippingCostAction } from "@/actions/shipping";
 
-export default function CreateShipping() {
+interface TDivions {
+  label: string;
+  value: string;
+}
+
+export default function CreateShipping({ divisions }: { divisions: TDivions[] }) {
   const {
     handleSubmit,
     control,
@@ -64,18 +69,7 @@ export default function CreateShipping() {
               control={control}
               render={({ field }) => (
                 <Select
-                  options={[
-                    { label: "All over BD", value: "All over BD" },
-                    { label: "Insite City", value: "Insite City" },
-                    { label: "Barishal", value: "Barishal" },
-                    { label: "Chattogram", value: "Chattogram" },
-                    { label: "Dhaka", value: "Dhaka" },
-                    { label: "Khulna", value: "Khulna" },
-                    { label: "Rajshahi", value: "Rajshahi" },
-                    { label: "Rangpur", value: "Rangpur" },
-                    { label: "Mymensingh", value: "Mymensingh" },
-                    { label: "Sylhet", value: "Sylhet" },
-                  ]}
+                  options={divisions}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -116,9 +110,8 @@ export default function CreateShipping() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`px-6 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-600 ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`px-6 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-600 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {isSubmitting ? "Creating..." : "Create Shipping Cost"}
           </button>

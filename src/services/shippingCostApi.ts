@@ -12,6 +12,19 @@ async function getCookie() {
   );
   return cookieObj?.value;
 }
+export async function getDivisionsApi() {
+  const res = await fetch(`${BASE_URL}/api/shipping/divisions`, {
+    cache: "no-store",
+    next: { tags: ["shipping-divisions"] },
+  });
+
+  if (!res.ok) {
+    const result = await res.json().catch(() => ({}));
+    throw new Error(result.message || "Failed to fetch divisions!");
+  }
+
+  return res.json();
+}
 export async function getAllShippingCostApi() {
   const res = await fetch(`${BASE_URL}/api/shipping/all`, {
     cache: "no-store",
