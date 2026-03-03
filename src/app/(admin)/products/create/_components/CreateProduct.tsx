@@ -30,14 +30,25 @@ interface TDivions {
   value: string;
 }
 
+const divisions: TDivions[] = [
+  { label: "All over BD", value: "All over BD" },
+  { label: "Insite City", value: "Insite City" },
+  { label: "Barishal", value: "Barishal" },
+  { label: "Chattogram", value: "Chattogram" },
+  { label: "Dhaka", value: "Dhaka" },
+  { label: "Khulna", value: "Khulna" },
+  { label: "Mymensingh", value: "Mymensingh" },
+  { label: "Rajshahi", value: "Rajshahi" },
+  { label: "Rangpur", value: "Rangpur" },
+  { label: "Sylhet", value: "Sylhet" },
+];
+
 export default function CreateProduct({
   categories,
   brands,
-  divisions,
 }: {
   categories: TCategory[];
   brands: TBrand[];
-  divisions: TDivions[];
 }) {
   const router = useRouter();
 
