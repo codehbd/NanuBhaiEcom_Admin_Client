@@ -362,9 +362,9 @@ console.log(watch())
           {/* ---------------- Price / Stock ---------------- */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             {[
-              { name: "price", label: "Price *" },
+              { name: "price", label: "Product Price *" },
               { name: "previousPrice", label: "Previous Price" },
-              { name: "extraPrice", label: "Extra Price" },
+              { name: "extraPrice", label: "Handling Charge" },
               { name: "stock", label: "Stock" },
             ].map(({ name, label }) => (
               <div key={name}>
