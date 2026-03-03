@@ -33,6 +33,8 @@ export const createProductSchema = zod.object({
   featured: zod.enum(["true", "false"], "Invalid featured status").optional(),
   location: zod
     .enum([
+      "All over BD",
+      "Insite City",
       "Barishal",
       "Chattogram",
       "Dhaka",
@@ -88,6 +90,8 @@ export const updateProductSchema = zod.object({
   featured: zod.enum(["true", "false"], "Invalid featured status").optional(),
   location: zod
     .enum([
+      "All over BD",
+      "Insite City",
       "Barishal",
       "Chattogram",
       "Dhaka",

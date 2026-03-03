@@ -33,6 +33,8 @@ interface TDivions {
   value: string;
 }
 const divisions: TDivions[] = [
+  { label: "All over BD", value: "All over BD" },
+  { label: "Insite City", value: "Insite City" },
   { label: "Barishal", value: "Barishal" },
   { label: "Chattogram", value: "Chattogram" },
   { label: "Dhaka", value: "Dhaka" },

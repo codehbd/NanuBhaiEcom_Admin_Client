@@ -3,6 +3,8 @@ import zod from "zod";
 export const createShippingSchema = zod.object({
   division: zod.enum(
     [
+      "All over BD",
+      "Insite City",
       "Barishal",
       "Chattogram",
       "Dhaka",

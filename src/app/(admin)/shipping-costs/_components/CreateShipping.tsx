@@ -65,6 +65,8 @@ export default function CreateShipping() {
               render={({ field }) => (
                 <Select
                   options={[
+                    { label: "All over BD", value: "All over BD" },
+                    { label: "Insite City", value: "Insite City" },
                     { label: "Barishal", value: "Barishal" },
                     { label: "Chattogram", value: "Chattogram" },
                     { label: "Dhaka", value: "Dhaka" },
