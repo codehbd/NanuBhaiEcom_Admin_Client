@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useEffect } from "react";
 
-const COOKIE_KEY = "rows_per_page";
+const STORAGE_KEY = "pagination_rows_per_page";
 
 interface PaginationProps {
   total: number;
@@ -30,6 +31,18 @@ export default function Pagination({
   const currentPathname = usePathname();
   const pathname = basePath || currentPathname;
 
+  // Restore saved preference from localStorage on mount
+  useEffect(() => {
+    if (!searchParams.get(limitParamKey)) {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set(limitParamKey, saved);
+        router.replace(`${pathname}?${params.toString()}`);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const currentPage = Number(searchParams.get(paramKey)) || 1;
   const pageCount = Math.ceil(total / limit);
   const startItem = total === 0 ? 0 : (currentPage - 1) * limit + 1;
@@ -46,8 +59,7 @@ export default function Pagination({
   };
 
   const setLimit = (newLimit: number) => {
-    // Save preference in cookie (accessible by server on next request)
-    document.cookie = `${COOKIE_KEY}=${newLimit};path=/;max-age=${60 * 60 * 24 * 365}`;
+    localStorage.setItem(STORAGE_KEY, String(newLimit));
     const params = new URLSearchParams(searchParams.toString());
     params.set(limitParamKey, String(newLimit));
     params.set(paramKey, "1");

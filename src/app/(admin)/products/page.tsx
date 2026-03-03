@@ -9,7 +9,6 @@ import ProductFilters from "./_components/ProductFilters";
 import ProductSearch from "./_components/ProductSearch";
 import Pagination from "@/components/Pagination";
 import { getAllProductsApi } from "@/services/productApi";
-import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Product List | Nanuvaier Rosona Kothon - Your Online Shop",
@@ -98,9 +97,7 @@ export default async function ProductsPage({
   searchParams: SearchParams;
 }) {
   const { page, category, limit: limitParam, search } = await searchParams;
-  const cookieStore = await cookies();
-  const savedLimit = cookieStore.get("rows_per_page")?.value;
-  const currentLimit = Number(limitParam) || Number(savedLimit) || DEFAULT_LIMIT;
+  const currentLimit = Number(limitParam) || DEFAULT_LIMIT;
   const categories = await fetchFlatAllCategories();
   const total = await fetchProductsTotal(page, currentLimit, category, search);
 
