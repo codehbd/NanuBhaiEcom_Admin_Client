@@ -56,14 +56,19 @@ export interface TOrder {
 }
 
 export interface TMonthlySale {
-  month: string;
-  totalSales: number;
-  totalOrders: number;
+  month: string;        // e.g. "Jan", "Feb", ...
+  totalSales: number;   // gross revenue for that month
+  totalOrders: number;  // number of orders
+  totalDiscount?: number;  // total discount given
+  totalShipping?: number;  // total shipping collected
+  totalNet?: number;       // net revenue (gross - discount + shipping)
 }
 export interface TProfitSummery {
   totalGross: number;
   totalNet: number;
   totalOrders: number;
+  totalBuyingCost: number;
+  totalSellingPrice: number;
   profit: number;
   margin: number;
 }
@@ -72,5 +77,9 @@ export interface TStockProduct {
   _id: string;
   name: string;
   price: number;
+  buyingPrice: number | null;
   stock: number;
+  sold: number;
+  stockValue: number; // stock × price
+  reorderNeeded: boolean; // stock <= threshold
 }
